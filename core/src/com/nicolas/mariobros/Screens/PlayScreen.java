@@ -84,7 +84,7 @@ public class PlayScreen implements Screen {
         music.setLooping(true);
         music.play();
 
-        goomba = new Goomba(this, .32f, .32f);
+        goomba = new Goomba(this, 1f, .16f);
     }
 
     public TextureAtlas getAtlas(){
@@ -148,7 +148,7 @@ public class PlayScreen implements Screen {
         game.batch.setProjectionMatrix(gamecam.combined);
         game.batch.begin();
         player.draw(game.batch);
-        goomba.draw(game.batch);
+        //goomba.draw(game.batch);
         game.batch.end();
 
         //set our batch to now draw what the hud camera sees

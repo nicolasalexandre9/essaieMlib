@@ -4,6 +4,7 @@ package com.nicolas.mariobros.Screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.nicolas.mariobros.MarioBros;
 import com.nicolas.mariobros.Scenes.Hud;
+import com.nicolas.mariobros.Sprites.Goomba;
 import com.nicolas.mariobros.Sprites.Mario;
 import com.nicolas.mariobros.Tools.B2WorldCreator;
 import com.nicolas.mariobros.Tools.WorldContactListener;
@@ -42,9 +44,11 @@ public class PlayScreen implements Screen {
     private World world ;
     private Box2DDebugRenderer b2dr;
 
+    //sprites
     private Mario player;
+    private Goomba goomba;
 
-
+    private Music music;
 
     public PlayScreen(MarioBros game){
         atlas = new TextureAtlas("Mario_and_Enemies.pack");
@@ -65,15 +69,22 @@ public class PlayScreen implements Screen {
         //initially set our gamcam to be centered correctly at the start of map
         gamecam.position.set(gamePort.getWorldWidth() / 2, gamePort.getWorldHeight() / 2, 0);
 
+
         world = new World(new Vector2(0, -10), true);
         b2dr = new Box2DDebugRenderer();
 
-        new B2WorldCreator(world,map);
+        new B2WorldCreator(this);
 
         //create mario in our game world
-        player = new Mario(world, this);
+        player = new Mario(this);
 
         world.setContactListener(new WorldContactListener());
+
+        music = MarioBros.manager.get("audio/music/mario_music.ogg", Music.class);
+        music.setLooping(true);
+        music.play();
+
+        goomba = new Goomba(this, .32f, .32f);
     }
 
     public TextureAtlas getAtlas(){
@@ -107,6 +118,8 @@ public class PlayScreen implements Screen {
         world.step(1/60f, 6, 2);
 
         player.update(dt);
+        goomba.update(dt);
+        hud.update(dt);
 
         //attach our gamecam to our players.x coordinates...
         gamecam.position.x = player.b2body.getPosition().x;
@@ -135,6 +148,7 @@ public class PlayScreen implements Screen {
         game.batch.setProjectionMatrix(gamecam.combined);
         game.batch.begin();
         player.draw(game.batch);
+        goomba.draw(game.batch);
         game.batch.end();
 
         //set our batch to now draw what the hud camera sees
@@ -150,6 +164,13 @@ public class PlayScreen implements Screen {
         gamePort.update(width,height);
     }
 
+    public TiledMap getMap(){
+        return map;
+    }
+
+    public World getWorld(){
+        return world;
+    }
 
     public void pause() {
 
